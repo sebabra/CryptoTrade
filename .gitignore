@@ -1,0 +1,124 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (Mono Auto Generated)
+mono_crash.*
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Ll]og[.]txt
+[Ll]og[0-9]*[.]txt
+[Cc]ache/
+[Ll]ost[ ]?[Ff]ound/
+[Bb]uild[Ll]og.*
+[Tt]est[Rr]esult*
+[Nn]unit[.]*
+[Cc]overage/
+*.vsix
+*.modeluser
+*.vspscc
+*.vssscc
+*.vscode
+*.ide
+*.suo
+*.user
+*.tss
+*.data
+*.swp
+*.sln.docstates
+
+# Node.js dependencies
+node_modules/
+jspm_packages/
+
+# Java
+*.class
+*.war
+*.ear
+
+# Python
+*.py[cod]
+*$py.class
+
+# R
+.Rhistory
+.RData
+.Ruserdata
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# VS Code directories
+.vscode/
+.vscode/*
+
+# Rider
+.idea/
+*.sln.iml
+
+# DotNetCore
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# StyleCop
+StyleCopReport.xml
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# MAUI specific
+**/*.app/
+**/*.app.dSYM/
+**/*.ipa/
+**/*.apk/
+**/*.aab/
+**/*.xcarchive/
+**/*.hprof
+**/AppPackages/
+**/nuget/
+**/*.crash
+**/*.mdmp
+**/*.apk.metadata
+**/*.nupkg.metadata
+**/*.ipa.metadata
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio for Mac
+.vscode/
+.idea/

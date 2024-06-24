@@ -1,0 +1,1 @@
+select * from CryptoTrade.dbo.Candlesticks where IsGenerated = 1

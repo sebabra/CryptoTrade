@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="CrytoTadeUi.Views.LoadCandles"
+             xmlns:viewModels="clr-namespace:CrytoTadeUi.ViewModels"
+             xmlns:viewPartials="clr-namespace:CrytoTadeUi.ViewsPartial"
+             Title="LoadCandles">
+
+    <ContentPage.BindingContext>
+        <viewModels:CandlestickViewModel/>
+    </ContentPage.BindingContext>
+
+
+    <toolkit:Expander>
+        <toolkit:Expander.Header>
+            <Label Text="Show/Hide Selection"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"/>
+        </toolkit:Expander.Header>
+        <toolkit:Expander.Content>
+
+            <VerticalStackLayout Margin="20"
+                         Spacing="10">
+
+                <ActivityIndicator x:Name="activityIndic"
+                           Color="Red"
+                           HeightRequest="50"
+                           WidthRequest="50"
+                           IsVisible="false"/>
+                
+                
+                <Picker x:Name="pickerQuote"
+                Title="Select a Quote"
+                ItemsSource="{Binding UniqueQuotes}"
+                SelectedIndexChanged="OnPickerQuoteSelected"
+                SelectedItem="{Binding SelectedUniqueQuote}"
+                IsVisible="false">
+                </Picker>
+
+                <Picker x:Name="pickerAsset"
+                Title="Select an asset to load"
+                ItemsSource="{Binding Assets}"
+                ItemDisplayBinding="{Binding Name}"
+                SelectedItem="{Binding SelectedAsset}"
+                IsVisible="false">
+                </Picker>
+
+                <DatePicker x:Name="FromDatePicker"
+                    Date="{Binding SelectedFromDateTime}"
+                    Format="dd-MM-yyyy"
+                    DateSelected="OnDateSelected"/>
+
+                <TimePicker x:Name="FromTimePicker"
+                    Time="{Binding SelectedFromDateTime.TimeOfDay}"
+                    PropertyChanged="OnTimeChanged"/>
+
+                <DatePicker x:Name="ToDatePicker"
+                    Date="{Binding SelectedToDateTime}"
+                    Format="dd-MM-yyyy"
+                    DateSelected="OnDateSelected"/>
+
+                <TimePicker x:Name="ToTimePicker"
+                    Time="{Binding SelectedToDateTime.TimeOfDay}"
+                    PropertyChanged="OnTimeChanged"/>
+
+                <StackLayout>
+                    <viewPartials:SelectableTimeInterval BindingContext="{Binding TimeIntervalVM}"/>
+                </StackLayout>
+
+                <Button x:Name="loadCandlesButton"
+                Text="Load Candle"
+                IsEnabled="False"
+                Clicked="loadCandlesClicked"/>
+
+            </VerticalStackLayout>
+
+
+        </toolkit:Expander.Content>
+    </toolkit:Expander>
+
+</ContentPage>

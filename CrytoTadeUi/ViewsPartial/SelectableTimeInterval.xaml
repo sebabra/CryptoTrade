@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CrytoTadeUi.ViewModels"
+             xmlns:flex="clr-namespace:Microsoft.Maui.Controls;assembly=Microsoft.Maui.Controls"
+             x:Class="CrytoTadeUi.ViewsPartial.SelectableTimeInterval"
+             x:Name="TimeIntervalPicker">
+
+    <ContentView.BindingContext>
+        <vm:SelectableTimeIntervalViewModel />
+    </ContentView.BindingContext>
+
+    <StackLayout>
+        <Label Text="Select Time Intervals" 
+               HorizontalOptions="Center" 
+               VerticalOptions="CenterAndExpand" />
+
+        <flex:FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="Start" AlignItems="Start" BindableLayout.ItemsSource="{Binding TimeIntervals}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Orientation="Horizontal" Margin="5">
+                        <CheckBox IsChecked="{Binding IsSelected}" VerticalOptions="Center" />
+                        <Label Text="{Binding Interval}" VerticalOptions="Center" />
+                    </StackLayout>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </flex:FlexLayout>
+    </StackLayout>
+</ContentView>
