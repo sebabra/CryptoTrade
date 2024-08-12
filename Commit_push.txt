@@ -1,1 +1,3 @@
-Affichage -> Modification git
+1. Affichage -> Modification git
+2. + to stage indicidual files
+3. add a commit message + click on Commit All
