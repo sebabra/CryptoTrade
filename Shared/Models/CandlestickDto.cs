@@ -17,6 +17,9 @@ namespace Shared.Models
         public decimal TakerBuyQuoteVolume { get; set; }
         public bool IsGenerated { get; set; } = false;
 
+
+        public IchimokuDto Ichimoku { get; set; }
+
         public CandlestickDto Clone()
         {
             return new CandlestickDto

@@ -1,4 +1,5 @@
-﻿using CrytoTadeUi.Services;
+﻿using CrytoTadeUi.Models;
+using CrytoTadeUi.Services;
 using CrytoTadeUi.Services.CryptoTadeApi;
 using CrytoTadeUi.Views;
 using Microsoft.Extensions.Logging;
@@ -22,9 +23,16 @@ using System.Runtime.CompilerServices;
 
 
 // 6. Commit the files that you've staged in your local repository.
+// git commit -m "Initial commit"
 // 7. Copy the https url of your newly created repository.
 // 8. In the Command prompt, add the URL for the remote repository where your local repository will be pushed.
+// My url is https://github.com/sebabra/CryptoTrade.git
+// git remote add origin    
+
+
+
 // 9. Push the changes in your local repository to GitHub.
+// git push -u origin master
 // 10. Verify the changes on GitHub.
 
 // how to remove after a git add . ?
@@ -55,6 +63,8 @@ public class LoadCandlesViewModel: INotifyPropertyChanged
 
     public DateTime SelectedToDateTime { get; set; } = DateTime.Now;
 
+
+    public ObservableCollection<CandlestickData> Candlesticks { get; set; } = new ObservableCollection<CandlestickData>();
 
     public LoadCandlesViewModel(ExchangeInfoService exchangeInfoService, ILogger<LoadCandles> logger,ApiService apiService)
     {
@@ -105,7 +115,7 @@ public class LoadCandlesViewModel: INotifyPropertyChanged
     public async Task loadAssetByQuote()
     {
         var assets = await _exchangeInfoService.GetSpotSymbolInformation(SelectedUniqueQuote);
-
+        Assets.Clear();
         foreach (var asset in assets)
         {
             Assets.Add(asset);

@@ -14,7 +14,8 @@ public class CandlestickData
     public decimal Low { get; set; }
     public decimal Close { get; set; }
 
-    public CandlestickData(DateTime date, decimal open, decimal high, decimal low, decimal close) {
+    public CandlestickData(DateTime date, decimal open, decimal high, decimal low, decimal close)
+    {
         Date = date;
         Open = open;
         High = high;

@@ -122,3 +122,5 @@ ScaffoldingReadMe.txt
 # Visual Studio for Mac
 .vscode/
 .idea/
+
+.vs/

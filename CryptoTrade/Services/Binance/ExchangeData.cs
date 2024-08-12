@@ -31,7 +31,7 @@ public class ExchangeData
         /// Spot account type
         //symbols = symbols.Where(s => s.Permissions.Contains(AccountType.Spot));
 
-        return symbols.ToList();
+        return symbols.OrderBy(s=>s.BaseAsset).ThenBy(s=>s.QuoteAsset).ToList();
     }
 
     public async Task<BinanceSymbol?> getSymbolInformation(string symbol)

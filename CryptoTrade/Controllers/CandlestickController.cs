@@ -44,6 +44,33 @@ public class CandlestickController : ControllerBase
         _exchangeData = exchangeData;
     }
 
+    [Route("Ichimoku")]
+    [HttpGet]
+    public async Task<ActionResult> getCandlesticksIchimoku([FromQuery] string symbol,
+        [FromQuery, ModelBinder(BinderType = typeof(KlineIntervalBinder))] KlineInterval interval,
+        [FromQuery] DateTime startTime,
+        [FromQuery] DateTime endTime)
+    {
+        IList<CandlestickDto> candlesticks = new List<CandlestickDto>();
+
+        try
+        {
+            candlesticks = await getCandlesticksDto(symbol, interval, startTime, endTime);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+
+        // Create an Ichimoku object with the default parameters
+        var ichimoku = new Ichimoku(9, 26, 52, 26, candlesticks.ToList());
+        // Calculate the Ichimoku Cloud
+        ichimoku.CalculateIchimokuCloud();
+
+        return Ok(candlesticks);
+    }
+
 
 
     // TO DO : Vérifier que les appelles a l'api binance ne dépasse pas le MAX
@@ -54,20 +81,23 @@ public class CandlestickController : ControllerBase
         [FromQuery] DateTime startTime,
         [FromQuery] DateTime endTime)
     {
-        #region Check Start time + end time valide par rapport a l'interval demandé
-        var intervalHelper = new IntervalHelper(interval);
+
+        IList<CandlestickDto> candlesticks = new List<CandlestickDto>();
+
         try
         {
-            if (!intervalHelper.isValidStartTime(startTime, out DateTime correctedStartTime))
-            {
-                return BadRequest($"La startTime {startTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")} n'est pas valid pour l'interval {interval}.\n" +
-                                  $"La plus proche startTime valide en dessous est {correctedStartTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}");
-            }
-            if (!intervalHelper.isValidEndTime(endTime, out DateTime correctedEndTime))
-            {
-                return BadRequest($"La endTime {endTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")} n'est pas valide pour l'intervalle {interval}.\n" +
-                                  $"La plus proche endTime valide au dessus est {correctedEndTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}");
-            }
+            candlesticks = await getCandlesticksDto(symbol, interval, startTime, endTime);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
+
+        #region Check si toute les candles se suivent bien
+        try
+        {
+            CandlestickHelper.isContinuous(candlesticks);
         }
         catch (Exception error)
         {
@@ -75,10 +105,46 @@ public class CandlestickController : ControllerBase
         }
         #endregion
 
+        HttpContext.Response.Headers.Append("NbCandle", candlesticks.Count + "");
+
+        if (candlesticks.Count > 2000)
+        {
+            HttpContext.Response.Headers.Append("NbCandleReturned", 2000 + "");
+
+            return Ok(candlesticks.Take(2000));
+        }
+
+        return Ok(candlesticks);
+    }
+
+    // Create me a method that will receive the input of the getCandlesticks method and return a List<CandlestickDto>
+    public async Task<IList<CandlestickDto>> getCandlesticksDto(string symbol, KlineInterval interval, DateTime startTime, DateTime endTime)
+    {
+        #region Check Start time + end time valide par rapport a l'interval demandé
+        var intervalHelper = new IntervalHelper(interval);
+        try
+        {
+            if (!intervalHelper.isValidStartTime(startTime, out DateTime correctedStartTime))
+            {
+                throw new Exception($"La startTime {startTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")} n'est pas valid pour l'interval {interval}.\n" +
+                                  $"La plus proche startTime valide en dessous est {correctedStartTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}");
+            }
+            if (!intervalHelper.isValidEndTime(endTime, out DateTime correctedEndTime))
+            {
+                throw new Exception($"La endTime {endTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")} n'est pas valide pour l'intervalle {interval}.\n" +
+                                  $"La plus proche endTime valide au dessus est {correctedEndTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")}");
+            }
+        }
+        catch (Exception error)
+        {
+            throw new Exception(error.Message);
+        }
+        #endregion
+
         #region Check si end time est > start time
         if (endTime < startTime)
         {
-            return BadRequest($"La end time {endTime} ne peut pas être < a la startTime {startTime}");
+            throw new Exception($"La end time {endTime} ne peut pas être < a la startTime {startTime}");
         }
         #endregion
 
@@ -86,22 +152,22 @@ public class CandlestickController : ControllerBase
         DateTime now = DateTime.Now.ToUniversalTime();
         if (endTime >= now)
         {
-            return BadRequest($"La endTime {endTime} ne peux pas être >= a maintenant {now}");
+            throw new Exception($"La endTime {endTime} ne peux pas être >= a maintenant {now}");
         }
         if (startTime >= now)
         {
-            return BadRequest($"La startTime {startTime} ne peux pas être >= a maintenant {now}");
+            throw new Exception($"La startTime {startTime} ne peux pas être >= a maintenant {now}");
         }
         #endregion
 
         #region Check startTime et endTime + 1 ms sont bien entier
         var nbTotalSecondsRequested = (endTime.AddMilliseconds(1) - startTime).TotalSeconds;
-        if (!(nbTotalSecondsRequested == Math.Floor(nbTotalSecondsRequested))) return BadRequest($"The start time {startTime} and end time {endTime} did not return an integer when substrating them together");
+        if (!(nbTotalSecondsRequested == Math.Floor(nbTotalSecondsRequested))) throw new Exception($"The start time {startTime} and end time {endTime} did not return an integer when substrating them together");
         #endregion
 
         #region Get the interval from the DB
         var dbInterval = await _intervalRepository.GetInterval((int)interval);
-        if (dbInterval == null) return NotFound($"Interval {interval} does not exist in the DB");
+        if (dbInterval == null) throw new Exception($"Interval {interval} does not exist in the DB");
         #endregion
 
         #region Get the Symbol from the DB
@@ -111,7 +177,7 @@ public class CandlestickController : ControllerBase
             // Si symbol null il faut aller voir dans binance si le symbol existe bien 
             // Si oui on le crée
             var binanceSymbol = await _exchangeData.getSymbolInformation(symbol);
-            if (binanceSymbol == null) return NotFound($"Symbol {symbol} does not exist in binance");
+            if (binanceSymbol == null) throw new Exception($"Symbol {symbol} does not exist in binance");
             // Créer le symbol en DB
             dbSymbol = _mapper.Map<Symbol>(binanceSymbol);
             await _symbolRepository.SaveSymbol(dbSymbol);
@@ -151,7 +217,7 @@ public class CandlestickController : ControllerBase
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                throw new Exception(ex.Message);
             }
         }
         #endregion
@@ -179,27 +245,7 @@ public class CandlestickController : ControllerBase
         candleSticks.AddRange(binanceCandlesticksDto);
         candleSticks = candleSticks.OrderBy(c => c.OpenTime).ToList();
 
-        #region Check si toute les candles se suivent bien
-        try
-        {
-            CandlestickHelper.isContinuous(candleSticks);
-        }
-        catch (Exception error)
-        {
-            return BadRequest(error.Message);
-        }
-        #endregion
-
-        HttpContext.Response.Headers.Append("NbCandle", candleSticks.Count + "");
-
-        if(candleSticks.Count > 2000)
-        {
-            HttpContext.Response.Headers.Append("NbCandleReturned", 2000+"");
-
-            return Ok(candleSticks.Take(2000));
-        }
-
-        return Ok(candleSticks);
+        return candleSticks;
     }
 
     public async Task<IEnumerable<CandlestickDto>> getBinanceCandlesticks(string symbol, KlineInterval interval, Gap gap)
@@ -230,10 +276,10 @@ public class CandlestickController : ControllerBase
 
             var weigth1m = response.ResponseHeaders?.First(r => r.Key == "x-mbx-used-weight-1m").Value;
             if (weigth1m == null) throw new Exception("The weigth1m is null ??");
-            var weigth1mJoin = string.Join("",weigth1m);
+            var weigth1mJoin = string.Join("", weigth1m);
 
             bool success = int.TryParse(weigth1mJoin, out int result);
-            if(result >= 5000)
+            if (result >= 5000)
             {
                 Thread.Sleep(60000);
             }
@@ -318,7 +364,7 @@ public class CandlestickController : ControllerBase
     public ActionResult<DateTime> getCorrectEndTime([FromQuery] DateTime endTime,
                                    [FromQuery, ModelBinder(BinderType = typeof(KlineIntervalBinder))] KlineInterval interval)
     {
-        var intervalHelper = new IntervalHelper(interval); 
+        var intervalHelper = new IntervalHelper(interval);
         intervalHelper.isValidEndTime(endTime, out DateTime correctedEndTime);
         return Ok(correctedEndTime);
     }

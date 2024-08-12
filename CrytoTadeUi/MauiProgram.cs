@@ -4,6 +4,7 @@ using CrytoTadeUi.Services.CryptoTadeApi;
 using CrytoTadeUi.ViewModels;
 using CrytoTadeUi.Views;
 using Microsoft.Extensions.Logging;
+using Syncfusion.Maui.Core.Hosting;
 
 namespace CrytoTadeUi
 {
@@ -15,6 +16,7 @@ namespace CrytoTadeUi
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .ConfigureSyncfusionCore()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
